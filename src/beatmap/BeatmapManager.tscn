@@ -1,0 +1,94 @@
+[gd_scene load_steps=3 format=3 uid="uid://bon2n74n8h7e1"]
+
+[ext_resource type="Script" path="res://src/beatmap/BeatmapManager.gd" id="1_c2rle"]
+[ext_resource type="Script" path="res://src/beatmap/BeatmapScreenDivider.gd" id="2_kv084"]
+
+[node name="BeatmapManager" type="CanvasLayer"]
+script = ExtResource("1_c2rle")
+
+[node name="ScreenDivider" type="VSplitContainer" parent="."]
+clip_contents = true
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+split_offset = 480
+script = ExtResource("2_kv084")
+
+[node name="ScreenTop" type="Control" parent="ScreenDivider"]
+layout_mode = 2
+
+[node name="Background" type="ColorRect" parent="ScreenDivider/ScreenTop"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.85098, 0.85098, 0.85098, 1)
+
+[node name="TextContainer" type="VBoxContainer" parent="ScreenDivider/ScreenTop"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 13.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 2
+
+[node name="Text1" type="RichTextLabel" parent="ScreenDivider/ScreenTop/TextContainer"]
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+theme_override_font_sizes/normal_font_size = 70
+bbcode_enabled = true
+text = "[color=#000000]the quick b[color=#888][u]r[/u]own fox"
+autowrap_mode = 0
+shortcut_keys_enabled = false
+
+[node name="Text2" type="RichTextLabel" parent="ScreenDivider/ScreenTop/TextContainer"]
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+theme_override_font_sizes/normal_font_size = 70
+bbcode_enabled = true
+text = "[color=#000000][color=#888]the quick brown fox"
+autowrap_mode = 0
+shortcut_keys_enabled = false
+
+[node name="BottomScreenDivider" type="VSplitContainer" parent="ScreenDivider"]
+layout_mode = 2
+split_offset = 20
+
+[node name="ScreenMiddle" type="Control" parent="ScreenDivider/BottomScreenDivider"]
+layout_mode = 2
+
+[node name="Background" type="ColorRect" parent="ScreenDivider/BottomScreenDivider/ScreenMiddle"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.909804, 0.286275, 0.584314, 1)
+
+[node name="ScreenBottom" type="Control" parent="ScreenDivider/BottomScreenDivider"]
+layout_mode = 2
+
+[node name="Background" type="ColorRect" parent="ScreenDivider/BottomScreenDivider/ScreenBottom"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.670588, 0.423529, 0.898039, 1)
+
+[node name="AspectRatioContainer" type="AspectRatioContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+stretch_mode = 3

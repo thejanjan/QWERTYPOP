@@ -1,0 +1,3 @@
+res://src/beatmap/BeatmapManager.tscn
+res://resources/beatmaps/BeatmapLoader.gd
+res://resources/beatmaps/Beatmap.gd
