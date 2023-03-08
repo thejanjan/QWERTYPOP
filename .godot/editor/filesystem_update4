@@ -1,3 +1,8 @@
 res://src/beatmap/BeatmapManager.tscn
-res://resources/beatmaps/BeatmapLoader.gd
 res://resources/beatmaps/Beatmap.gd
+res://resources/beatmaps/BeatmapLoader.gd
+res://resources/beatmaps/InitConfig.gd
+res://src/beatmap/BeatmapManager.gd
+res://resources/beatmaps/Line.gd
+res://resources/beatmaps/Action.gd
+res://resources/beatmaps/Config.gd
