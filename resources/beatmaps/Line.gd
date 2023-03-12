@@ -20,11 +20,19 @@ func _init(_line_sd: int = 0,
 	timings = _timings
 	start_delay = _start_delay
 	end_delay = _end_delay
+	
+	# Validate just in case.
+	var valid = validate()
+	if valid != LineState.VALID:
+		push_error('bad line state: ', valid)
 
 ### Simple Getters ###
 
 func get_lyric() -> String:
 	return lyric
+	
+func get_inputs() -> String:
+	return inputs
 
 ### Getters ###
 
@@ -42,6 +50,7 @@ func get_actions(sd: int, bm: Beatmap) -> Array[Action]:
 		
 	# If this line is active, check for inputs.
 	var scroll_speed = bm.get_scroll_speed()
+	var timing_window = bm.get_timing_window()
 	if (((start_sd - scroll_speed) <= sd) and (sd <= end_sd)):
 		for i in range(timings.size()):
 			# Get the variables at this timing.
@@ -50,9 +59,13 @@ func get_actions(sd: int, bm: Beatmap) -> Array[Action]:
 			
 			# Add actions if they match.
 			if (sd == (timing - scroll_speed)):
-				actions.append(Action.new(Action.Type.SPAWN_KEY, [letter]))
+				actions.append(Action.new(Action.Type.SPAWN_KEY, [self, letter, timing]))
 			if (sd == timing):
-				actions.append(Action.new(Action.Type.PRESS_KEY, [letter]))
+				actions.append(Action.new(Action.Type.PRESS_KEY, [self, letter]))
+			if (sd == (timing - timing_window)):
+				actions.append(Action.new(Action.Type.OPEN_WINDOW, [self, letter, i, timing]))
+			if (sd == (timing + timing_window)):
+				actions.append(Action.new(Action.Type.CLOSE_WINDOW, [self, letter, i, timing]))
 	
 	# Return our actions.
 	return actions
@@ -77,8 +90,8 @@ func validate() -> LineState:
 	# Make sure all of the input letters are in order.
 	var current_inputs = String(inputs)
 	for letter in lyric:
-		if letter == current_inputs[0]:
-			current_inputs.left(-1)
+		if current_inputs != "" and letter == current_inputs[0]:
+			current_inputs = current_inputs.right(-1)
 	
 	if current_inputs != "":
 		return LineState.INPUTS_OUT_OF_ORDER

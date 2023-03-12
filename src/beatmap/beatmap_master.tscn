@@ -1,0 +1,47 @@
+[gd_scene load_steps=5 format=3 uid="uid://cauaawp7dvga1"]
+
+[ext_resource type="PackedScene" uid="uid://bon2n74n8h7e1" path="res://src/beatmap/BeatmapManager.tscn" id="1_jtjgy"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_7tvoe"]
+vertex_color_use_as_albedo = true
+albedo_color = Color(0.0117647, 0.447059, 1, 0.392157)
+
+[sub_resource type="Animation" id="Animation_k5sva"]
+resource_name = "loop"
+loop_mode = 1
+tracks/0/type = "rotation_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 1, 1, 0, 0.707, -0.707, 0)
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_oxa82"]
+_data = {
+"loop": SubResource("Animation_k5sva")
+}
+
+[node name="BeatmapMaster" type="Node"]
+
+[node name="BeatmapWorld" type="Node3D" parent="."]
+
+[node name="Camera3D" type="Camera3D" parent="BeatmapWorld"]
+projection = 1
+size = 10.0
+near = 0.056
+
+[node name="CSGBox3D" type="CSGBox3D" parent="BeatmapWorld"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -4.95653)
+material = SubResource("StandardMaterial3D_7tvoe")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="BeatmapWorld/CSGBox3D"]
+autoplay = "loop"
+libraries = {
+"": SubResource("AnimationLibrary_oxa82")
+}
+
+[node name="OmniLight3D" type="OmniLight3D" parent="BeatmapWorld"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.48651)
+
+[node name="BeatmapManager" parent="." instance=ExtResource("1_jtjgy")]

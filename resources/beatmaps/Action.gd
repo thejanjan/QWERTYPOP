@@ -6,6 +6,9 @@ enum Type {
 	PRESS_KEY,
 	START_LINE,
 	END_LINE,
+	OPEN_WINDOW,
+	CLOSE_WINDOW,
+	SPAWN_LION,
 }
 
 # A class for describing an action.

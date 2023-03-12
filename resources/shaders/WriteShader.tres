@@ -1,0 +1,24 @@
+[gd_resource type="Shader" format=3 uid="uid://cxgh7h2vkq18o"]
+
+[resource]
+code = "// NOTE: Shader automatically converted from Godot Engine 4.0.rc1's CanvasItemMaterial.
+
+shader_type canvas_item;
+render_mode blend_mix;
+
+uniform vec4 color_mult: source_color = vec4(0.0, 0.0, 0.0, 1.0);
+
+void vertex() {
+	VERTEX.x += 0.0;
+	VERTEX.y += 0.0;
+}
+
+
+void fragment() {
+	float xjiggle = sin(TIME * 40.0 + VERTEX.x);
+	float yjiggle = cos(TIME * 89.0);
+	float jigmult = 0.001;
+	vec4 color = texture(TEXTURE, UV + vec2(xjiggle * jigmult, yjiggle * jigmult));
+	COLOR = color_mult * color;
+}
+"

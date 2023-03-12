@@ -1,0 +1,137 @@
+[gd_scene load_steps=5 format=3 uid="uid://5lyh7o4omq6u"]
+
+[ext_resource type="Script" path="res://src/beatmap/ScrollNote.gd" id="1_48c65"]
+[ext_resource type="FontFile" uid="uid://cvt4ukswmwh0p" path="res://resources/fonts/XanhMono-Regular.ttf" id="2_qk4d0"]
+
+[sub_resource type="Animation" id="Animation_4wvog"]
+resource_name = "Slide"
+length = 1.5
+tracks/0/type = "bezier"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:offset")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"handle_modes": PackedInt32Array(0, 0, 0),
+"points": PackedFloat32Array(-0.0151655, -0.25, 0, 1, 1.01771, 1, -1, -1.01301, 0.2, 0.19296, 1.5, -0.2, -0.197456, 0.25, 0),
+"times": PackedFloat32Array(0, 1, 1.5)
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_mp1t7"]
+_data = {
+"Slide": SubResource("Animation_4wvog")
+}
+
+[node name="ScrollNote" type="Control"]
+custom_minimum_size = Vector2(45, 110)
+layout_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -32.5
+offset_top = -55.0
+offset_right = 32.5
+offset_bottom = 55.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_48c65")
+offset = 1.19764
+
+[node name="Assets" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -0.000244141
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Keycap" type="Control" parent="Assets"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Border" type="ColorRect" parent="Assets/Keycap"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 1)
+
+[node name="Rhythm" type="ColorRect" parent="Assets/Keycap"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.04
+anchor_top = 0.04
+anchor_right = 0.96
+anchor_bottom = 0.96
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 1, 1, 1)
+
+[node name="White" type="ColorRect" parent="Assets/Keycap"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.1
+anchor_top = 0.1
+anchor_right = 0.9
+anchor_bottom = 0.9
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="RichTextLabel" type="RichTextLabel" parent="Assets/Keycap"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -26.5
+offset_top = -63.0
+offset_right = 26.5
+offset_bottom = 63.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_fonts/normal_font = ExtResource("2_qk4d0")
+theme_override_font_sizes/normal_font_size = 105
+bbcode_enabled = true
+text = "[center][color=#000000]W[/color][/center]"
+fit_content = true
+autowrap_mode = 0
+
+[node name="Line" type="Control" parent="Assets"]
+visible = false
+layout_mode = 1
+anchors_preset = 13
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ColorRect" type="ColorRect" parent="Assets/Line"]
+z_index = -10
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -5.0
+offset_top = -50.0
+offset_right = 5.0
+offset_bottom = 50.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.368627, 0.368627, 0.368627, 1)
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+"": SubResource("AnimationLibrary_mp1t7")
+}

@@ -1,0 +1,114 @@
+[gd_scene load_steps=10 format=3 uid="uid://bd16fcg2rqf0a"]
+
+[ext_resource type="Script" path="res://src/beatmap/LineNode.gd" id="1_gwkl6"]
+[ext_resource type="Theme" uid="uid://bk4qi06iy7d62" path="res://resources/BeatmapType.tres" id="2_q3t63"]
+[ext_resource type="Script" path="res://src/beatmap/TextType.gd" id="3_fpnnh"]
+[ext_resource type="Script" path="res://src/beatmap/TextWrite.gd" id="4_cnbbv"]
+[ext_resource type="Script" path="res://src/beatmap/TextLine.gd" id="5_rr3mw"]
+
+[sub_resource type="Animation" id="Animation_bgack"]
+resource_name = "Kick"
+step = 0.01
+tracks/0/type = "bezier"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:position:x")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"handle_modes": PackedInt32Array(0, 0),
+"points": PackedFloat32Array(-20, -0.25, 0, 0, 19.7301, 0, -0.23, -0.0720946, 0.25, 0),
+"times": PackedFloat32Array(0, 0.3)
+}
+tracks/1/type = "bezier"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath(".:position:y")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"handle_modes": PackedInt32Array(),
+"points": PackedFloat32Array(),
+"times": PackedFloat32Array()
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_tn6m0"]
+_data = {
+"Kick": SubResource("Animation_bgack")
+}
+
+[sub_resource type="Animation" id="Animation_x2mwh"]
+resource_name = "TextSpawn"
+step = 0.001
+tracks/0/type = "bezier"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:node_height")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"handle_modes": PackedInt32Array(0, 0, 0),
+"points": PackedFloat32Array(0, -0.25, 0, 0.034, 0.651883, 1, -0.133, 0.0236009, 0.1, -0.0664206, 1, -0.1, -0.00406063, 0.1, -0.0290046),
+"times": PackedFloat32Array(0.1, 0.25, 0.4)
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_rdj8s"]
+_data = {
+"TextSpawn": SubResource("Animation_x2mwh")
+}
+
+[node name="LineNode" type="Control"]
+custom_minimum_size = Vector2(2000, 100)
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_gwkl6")
+node_height = 1.0
+
+[node name="TextType" type="RichTextLabel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_q3t63")
+bbcode_enabled = true
+text = "[color=#666]what is this s[/color]
+"
+script = ExtResource("3_fpnnh")
+type_color = Color(0.411765, 0.411765, 0.411765, 1)
+
+[node name="TextWrite" type="RichTextLabel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_q3t63")
+bbcode_enabled = true
+text = "[color=#000]what i[/color]
+"
+script = ExtResource("4_cnbbv")
+
+[node name="TextLine" type="RichTextLabel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_q3t63")
+bbcode_enabled = true
+text = "[color=#000][u] [/u][/color]"
+script = ExtResource("5_rr3mw")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="TextLine"]
+libraries = {
+"": SubResource("AnimationLibrary_tn6m0")
+}
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+"": SubResource("AnimationLibrary_rdj8s")
+}

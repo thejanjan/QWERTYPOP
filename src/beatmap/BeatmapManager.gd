@@ -2,15 +2,36 @@ extends CanvasLayer
 class_name BeatmapManager
 
 # The master Beatmap manager script.
-
-var beatmap : Beatmap
+var beatmap: Beatmap
 var audio_stream: AudioStream
+
 @onready var music = $Music
+@onready var line_manager = %LineManager
 
 # Beatmap state
 var current_sd: int = 0
 
+# Signal declarations
+signal spawn_key(line: Line, key: String, sd: int)
+signal press_key(line: Line, key: String)
+signal start_line(line: Line)
+signal end_line(line: Line)
+signal open_window(line: Line, key: String, i: int, sd: int)
+signal close_window(line: Line, key: String, i: int, sd: int)
+signal spawn_lion()
 
+# Action to signal mapping
+var action2signal: Dictionary = {
+	Action.Type.SPAWN_KEY: spawn_key,
+	Action.Type.PRESS_KEY: press_key,
+	Action.Type.START_LINE: start_line,
+	Action.Type.END_LINE: end_line,
+	Action.Type.OPEN_WINDOW: open_window,
+	Action.Type.CLOSE_WINDOW: close_window,
+	Action.Type.SPAWN_LION: spawn_lion,
+}
+
+# Inits/Step
 func _init():
 	var bl = BeatmapLoader.new()
 	beatmap = bl.test_beatmap()
@@ -23,14 +44,14 @@ func _ready():
 	
 	# Start the track.
 	music.set_stream(audio_stream)
+	music.set_pitch_scale(beatmap.get_speed_mult())
 	music.play()
-
 
 func _process(delta):
 	# Call music_process if the track is playing.
 	if music.is_playing():
 		# Get variables for the current state of the song.
-		var t: float = music.get_playback_position()
+		var t: float = music.get_playback_position() / beatmap.get_speed_mult()
 		var sd: int = beatmap.get_subdivision(t)
 		
 		# Run music process.
@@ -42,6 +63,11 @@ func _process(delta):
 			subdivision_process(process_sd, spawn)
 		current_sd = sd + 1
 
+### Getters ###
+
+func get_beatmap() -> Beatmap:
+	return beatmap
+
 ### Music Logic ###
 
 func music_process(t: float):
@@ -52,30 +78,19 @@ func subdivision_process(sd: int, spawn: int):
 	
 	# Perform all actions.
 	for action in beatmap.get_actions(sd):
-		match action.get_type():
-			Action.Type.SPAWN_KEY:
-				action_spawn_key(action.get_args()[0])
-			Action.Type.PRESS_KEY:
-				action_press_key(action.get_args()[0])
-			Action.Type.START_LINE:
-				action_start_line(action.get_args()[0])
-			Action.Type.END_LINE:
-				aciton_end_line(action.get_args()[0])
+		var sig: Signal = action2signal.get(action.get_type())
+		var args = action.get_args()
+		match args.size():
+			0:
+				sig.emit()
+			1:
+				sig.emit(args[0])
+			2:
+				sig.emit(args[0], args[1])
+			3:
+				sig.emit(args[0], args[1], args[2])
+			4:
+				sig.emit(args[0], args[1], args[2], args[3])
 
 func music_finish():
 	print('Done!')
-
-### Action Manager ###
-
-func action_spawn_key(key: String):
-	pass
-	# print('Spawn: ', key)
-
-func action_press_key(key: String):
-	print('Press: ', key)
-
-func action_start_line(line: Line):
-	print('Start Line: ', line.get_lyric())
-
-func aciton_end_line(line: Line):
-	print('End Line: ', line.get_lyric())
