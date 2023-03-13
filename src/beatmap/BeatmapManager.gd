@@ -13,7 +13,7 @@ var current_sd: int = 0
 
 # Signal declarations
 signal spawn_key(line: Line, key: String, sd: int)
-signal press_key(line: Line, key: String)
+signal press_key(line: Line, key: String, i: int, sd: int)
 signal start_line(line: Line)
 signal end_line(line: Line)
 signal open_window(line: Line, key: String, i: int, sd: int)
@@ -68,14 +68,15 @@ func _process(delta):
 func get_beatmap() -> Beatmap:
 	return beatmap
 
+func get_t() -> float:
+	return music.get_playback_position() / beatmap.get_speed_mult()
+
 ### Music Logic ###
 
 func music_process(t: float):
 	pass
 	
 func subdivision_process(sd: int, spawn: int):
-	print('sd: ', sd, ' / ', spawn)
-	
 	# Perform all actions.
 	for action in beatmap.get_actions(sd):
 		var sig: Signal = action2signal.get(action.get_type())
@@ -91,6 +92,8 @@ func subdivision_process(sd: int, spawn: int):
 				sig.emit(args[0], args[1], args[2])
 			4:
 				sig.emit(args[0], args[1], args[2], args[3])
+			5:
+				sig.emit(args[0], args[1], args[2], args[3], args[4])
 
 func music_finish():
-	print('Done!')
+	pass

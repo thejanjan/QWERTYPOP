@@ -30,7 +30,7 @@ func spawn_key(line: Line, letter: String, sd: int) -> void:
 		# Create a new scrollnote.
 		scroll_note = scroll_note_tscn.instantiate()
 		hitline.add_child(scroll_note)
-		scroll_note.startup(beatmap_manager.get_beatmap(), sd)
+		scroll_note.startup(beatmap_manager, sd)
 		sd_to_scrollnote[sd] = scroll_note
 	
 	# Add a letter to the scroll note.
@@ -40,14 +40,16 @@ func spawn_key(line: Line, letter: String, sd: int) -> void:
 func on_key_press(line: Line, letter: String, i: int, sd: int) -> void:
 	# Find the scroll note and remove a letter from it.
 	var scroll_note: ScrollNote = sd_to_scrollnote.get(sd)
-	if scroll_note != null:
+	if scroll_note == null:
 		return
 	
 	scroll_note.remove_letter(letter)
+	if scroll_note.cleaned_up():
+		sd_to_scrollnote.erase(sd)
 
 
-func spawn_lion():
+func spawn_lion(sd: int):
 	# Spawns a lion
 	var scroll_note = scroll_note_tscn.instantiate()
 	hitline.add_child(scroll_note)
-	scroll_note.startup(beatmap_manager.get_beatmap(), 0, true)
+	scroll_note.startup(beatmap_manager, sd, true)

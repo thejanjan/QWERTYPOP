@@ -9,7 +9,7 @@ func test_beatmap() -> Beatmap:
 	# Make the init config.
 	var initConfig = InitConfig.new(
 		'Bleatmap', 'A bleatmap.',
-		'res://resources/music/CUBE WORLD.mp3',
+		'res://resources/music/SUM.mp3',
 		172.0, 0.0, 12, 48, 4,
 	)
 	
@@ -44,20 +44,20 @@ func test_beatmap() -> Beatmap:
 		### Frame 2 ###
 		Line.new(
 			192 * 2,
-			'COGITO ERGO SUM',
-			'COGITOES',
+			'Cogito Ergo Sum',
+			'CogitoES',
 			[0, 3, 6, 12, 15, 18, 30, 42], -12, 6
 		),
 		Line.new(
 			192 * 2.25,
-			'COGITO ERGO SUM',
-			'COGITOES',
+			'Cogito Ergo Sum',
+			'CogitoES',
 			[0, 3, 6, 12, 15, 18, 30, 42], -12, 6
 		),
 		Line.new(
 			192 * 2.50,
-			'THAT MAGIC IN HIS EYE, HEXED ME',
-			'THATMAGICINHISEHEXEDME',
+			'That Magic In His Eye, Hexed Me',
+			'ThatMagicInHisEHexedMe',
 			[0, 3, 6, 12, 18, 21, 24, 27, 30, 36, 42,
 			48 + 0,  48 + 3,  48 + 6,  48 + 12,
 			48 + 18, 48 + 21, 48 + 24, 48 + 27,
@@ -66,15 +66,15 @@ func test_beatmap() -> Beatmap:
 		### Frame 3 ###
 		Line.new(
 			192 * 3,
-			'GALAXY WIZARD',
-			'GALAXYWIZARD',
+			'Wizard\'s Galaxy',
+			'WizardGalaxy',
 			[0, 3, 6, 18, 30, 42,
 			48 + 0, 48 + 3, 48 + 6, 48 + 18, 48 + 30, 48 + 42], -24, 6
 		),
 		Line.new(
 			192 * 3.50,
-			'HIS DAMNED XYZZY BRINGS FORTH',
-			'HISDXYZZYBF',
+			'His damned XYZZY brings forth',
+			'HisdXYZZYbf',
 			[0, 3, 6, 12, 18, 21, 24, 27, 30, 36, 42], -24, 6
 		),
 		Line.new(
@@ -124,22 +124,22 @@ func test_beatmap() -> Beatmap:
 		### Frame 6 ###
 		Line.new(
 			192 * 6,
-			'POUR PLEASE, MORE PLEASE',
-			'POURPLEASEMOREPLEASE',
+			'Pour Please, More Please',
+			'PourPleaseMorePlease',
 			[0, 3, 6, 9, 12, 14, 16, 18, 20, 22,
 			24, 27, 30, 33, 36, 38, 40, 42, 44, 46], -24, 6
 		),
 		Line.new(
 			192 * 6.25,
-			'POUR PLEASE, MORE PLEASE',
-			'POURPLEASEMOREPLEASE',
+			'Pour Please, More Please',
+			'PourPleaseMorePlease',
 			[0, 3, 6, 9, 12, 14, 16, 18, 20, 22,
 			24, 27, 30, 33, 36, 38, 40, 42, 44, 46], -12, 6
 		),
 		Line.new(
 			192 * 6.50,
-			'HIS WINE LEFT A GRIM TASTE UNLIKE PINOT',
-			'HISWINELEFTAGRIMTASTEUNLIKEPINOT',
+			'His Wine Left A Grim Taste Unlike Pinot',
+			'HisWineLeftAGrimTasteUnlikePinot',
 			[0, 3, 6, 9, 12, 15, 18, 21,
 			24, 27, 30, 33, 36, 39, 42, 45,
 			48, 51, 54, 57, 60, 63, 66, 69,
@@ -148,22 +148,22 @@ func test_beatmap() -> Beatmap:
 		### Frame 7 ###
 		Line.new(
 			192 * 7,
-			'POUR PLEASE, MORE PLEASE',
-			'POURPLEASEMOREPLEASE',
+			'Pour Please, More Please',
+			'PourPleaseMorePlease',
 			[0, 3, 6, 9, 12, 14, 16, 18, 20, 22,
 			24, 27, 30, 33, 36, 38, 40, 42, 44, 46], -24, 6
 		),
 		Line.new(
 			192 * 7.25,
-			'POUR PLEASE, MORE PLEASE',
-			'POURPLEASEMOREPLEASE',
+			'Pour Please, More Please',
+			'PourPleaseMorePlease',
 			[0, 3, 6, 9, 12, 14, 16, 18, 20, 22,
 			24, 27, 30, 33, 36, 38, 40, 42, 44, 46], -12, 6
 		),
 		Line.new(
 			192 * 7.50,
-			'AND WE WATCHED AS WE LAUGHED AND WE SAID',
-			'ANDWEWATCHEDASWELAUGHEDANDWESAID',
+			'And We Watched As We Laughed And We Said',
+			'AndWeWatchedAsWeLaughedAndWeSaid',
 			[0, 3, 6, 9, 12, 15, 18, 21,
 			24, 27, 30, 33, 36, 39, 42, 45,
 			48, 51, 54, 57, 60, 63, 66, 69,
@@ -196,8 +196,8 @@ func test_beatmap() -> Beatmap:
 		),
 		Line.new(
 			192 * 8.50,
-			'THE CANDLEABRA WAS LOSING WARM EMBERS',
-			'THECANDLEABRAWASLOSINGWARMEMBERS',
+			'The Candleabra Was Losing Warm Embers',
+			'TheCandleabraWasLosingWarmEmbers',
 			[0, 3, 6, 9, 12, 15, 18, 21,
 			24, 27, 30, 33, 36, 39, 42, 45,
 			48, 51, 54, 57, 60, 63, 66, 69,
@@ -230,8 +230,8 @@ func test_beatmap() -> Beatmap:
 		),
 		Line.new(
 			192 * 9.50,
-			'AND YET HE PREPARED ONE LAST SPELLCAST',
-			'ANDYETHEPREPAREDONELASTSPELLCAST',
+			'And Yet He Prepared One Last Spellcast',
+			'AndYetHePreparedOneLastSpellcast',
 			[0, 3, 6, 9, 12, 15, 18, 21,
 			24, 27, 30, 33, 36, 39, 42, 45,
 			48, 51, 54, 57, 60, 63, 66, 69,

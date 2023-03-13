@@ -33,6 +33,9 @@ func get_lyric() -> String:
 	
 func get_inputs() -> String:
 	return inputs
+	
+func get_timings() -> Array:
+	return timings
 
 ### Getters ###
 
@@ -61,7 +64,7 @@ func get_actions(sd: int, bm: Beatmap) -> Array[Action]:
 			if (sd == (timing - scroll_speed)):
 				actions.append(Action.new(Action.Type.SPAWN_KEY, [self, letter, timing]))
 			if (sd == timing):
-				actions.append(Action.new(Action.Type.PRESS_KEY, [self, letter]))
+				actions.append(Action.new(Action.Type.PRESS_KEY, [self, letter, i, timing]))
 			if (sd == (timing - timing_window)):
 				actions.append(Action.new(Action.Type.OPEN_WINDOW, [self, letter, i, timing]))
 			if (sd == (timing + timing_window)):

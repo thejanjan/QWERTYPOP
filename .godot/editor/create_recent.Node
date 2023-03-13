@@ -1,5 +1,9 @@
-ColorRect
 Control
+ColorRect
+VSplitContainer
+WorldEnvironment
+SubViewport
+AudioStreamPlayer
 CanvasLayer
 AnimationPlayer
 RichTextLabel
@@ -10,9 +14,7 @@ CSGBox3D
 Window
 Node3D
 Camera3D
-AudioStreamPlayer
 VBoxContainer
-VSplitContainer
 Container
 Panel
 Node2D

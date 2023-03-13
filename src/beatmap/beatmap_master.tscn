@@ -1,10 +1,10 @@
-[gd_scene load_steps=5 format=3 uid="uid://cauaawp7dvga1"]
+[gd_scene load_steps=6 format=3 uid="uid://cauaawp7dvga1"]
 
 [ext_resource type="PackedScene" uid="uid://bon2n74n8h7e1" path="res://src/beatmap/BeatmapManager.tscn" id="1_jtjgy"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_7tvoe"]
 vertex_color_use_as_albedo = true
-albedo_color = Color(0.0117647, 0.447059, 1, 0.392157)
+albedo_color = Color(0.94902, 0.0941176, 0.0941176, 1)
 
 [sub_resource type="Animation" id="Animation_k5sva"]
 resource_name = "loop"
@@ -21,6 +21,10 @@ tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 1, 1, 0, 0.707, -0.707, 0)
 _data = {
 "loop": SubResource("Animation_k5sva")
 }
+
+[sub_resource type="Environment" id="Environment_2wxge"]
+background_energy_multiplier = 0.0
+ambient_light_source = 3
 
 [node name="BeatmapMaster" type="Node"]
 
@@ -43,5 +47,8 @@ libraries = {
 
 [node name="OmniLight3D" type="OmniLight3D" parent="BeatmapWorld"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.48651)
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="BeatmapWorld"]
+environment = SubResource("Environment_2wxge")
 
 [node name="BeatmapManager" parent="." instance=ExtResource("1_jtjgy")]

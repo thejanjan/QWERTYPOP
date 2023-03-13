@@ -53,7 +53,7 @@ func get_actions(sd: int) -> Array[Action]:
 	
 	# Spawn a lion if need be.
 	if (sd % (get_map_SD())) == 0:
-		actions.append(Action.new(Action.Type.SPAWN_LION, []))
+		actions.append(Action.new(Action.Type.SPAWN_LION, [sd + (get_map_SD() * 5)]))
 	
 	return actions
 

@@ -9,12 +9,7 @@ var linesToNode: Dictionary = {}
 var active_lines: Array[Line] = []
 
 
-func _ready():
-	pass
-
 func action_start_line(line: Line):
-	print('Start Line: ', line.get_lyric())
-	
 	# Create new line group.
 	var line_node = line_node_tscn.instantiate()
 	add_child(line_node)
@@ -41,6 +36,6 @@ func action_ignored_input(line: Line, key: String):
 func action_whiffed_input(key: String):
 	if active_lines == []:
 		return
-	var line = active_lines[-1]
+	var line = active_lines[0]
 	var line_node = linesToNode.get(line)
 	line_node.on_whiffed_input(key)
