@@ -1,8 +1,10 @@
-res://src/beatmap/BeatmapManager.tscn
+res://default_bus_layout.tres
+res://src/beatmap/beatmap_master.tscn
 res://resources/beatmaps/Beatmap.gd
 res://resources/beatmaps/BeatmapLoader.gd
 res://resources/BeatmapType.tres
-res://src/beatmap/scroll_note.tscn
-res://src/beatmap/beatmap_master.tscn
-res://src/beatmap/InputManager.gd
+res://src/beatmap/BeatmapManager.tscn
 res://src/beatmap/line_node.tscn
+res://src/beatmap/scroll_note.tscn
+res://src/beatmap/sum/box_group.tscn
+res://src/debug/RecordingScene.tscn

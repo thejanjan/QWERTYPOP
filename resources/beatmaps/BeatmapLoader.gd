@@ -10,7 +10,7 @@ func test_beatmap() -> Beatmap:
 	var initConfig = InitConfig.new(
 		'Bleatmap', 'A bleatmap.',
 		'res://resources/music/SUM.mp3',
-		172.0, 0.0, 12, 48, 4,
+		172.0, 0.0, 12, 60, 4,
 	)
 	
 	# Make the lines.
@@ -21,6 +21,18 @@ func test_beatmap() -> Beatmap:
 		#	'Qwerty',
 		#	'Qwerty',
 		#	[0, 3, 6, 12, 15, 18], -24, 12
+		#),
+		#Line.new(
+		#	96,
+		#	'Qwerty',
+		#	'Qwerty',
+		#	[0, 0, 0, 12, 12, 12], -24, 12
+		#),
+		#Line.new(
+		#	120,
+		#	'Qwerty',
+		#	'Qwerty',
+		#	[0, 0, 0, 0, 0, 0], -24, 12
 		#),
 		#Line.new(
 		#	96,
@@ -409,26 +421,26 @@ func test_beatmap() -> Beatmap:
 		### Frame 15 ###
 		Line.new(
 			192 * 15,
-			'FOUND OURSELVES A HARMONY',
-			'FOSAHMY',
+			'found ourselves a harmony',
+			'fosahmy',
 			[0, 9, 12, 18, 24, 30, 36], -12, 6
 		),
 		Line.new(
 			192 * 15.25,
-			'DANCE AROUND THE STARS',
-			'DARTS',
+			'dance around the stars',
+			'darts',
 			[0, 9, 12, 18, 24], -12, 6
 		),
 		Line.new(
 			192 * 15.5,
-			'LEFT OURSELVES A LEGACY',
-			'LOSALAC',
+			'left ourselves a legacy',
+			'losalac',
 			[0, 9, 12, 18, 24, 30, 36], -12, 6
 		),
 		Line.new(
 			192 * 15.75,
-			'HOME UPON THE MILKY WAY',
-			'HUPTMKW',
+			'home upon the milky way',
+			'huptmkw',
 			[0, 9, 12, 18, 24, 30, 36], -12, 6
 		),
 		### Frame 16 ###

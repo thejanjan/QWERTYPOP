@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://bon2n74n8h7e1"]
+[gd_scene load_steps=31 format=3 uid="uid://bon2n74n8h7e1"]
 
 [ext_resource type="Script" path="res://src/beatmap/BeatmapManager.gd" id="1_c2rle"]
 [ext_resource type="Script" path="res://src/beatmap/BeatmapScreenDivider.gd" id="2_kv084"]
@@ -6,10 +6,343 @@
 [ext_resource type="Script" path="res://src/beatmap/LineGroup.gd" id="4_jtqlj"]
 [ext_resource type="Script" path="res://src/beatmap/InputManager.gd" id="5_87inu"]
 [ext_resource type="Script" path="res://src/beatmap/KeycapManager.gd" id="5_ow8bn"]
+[ext_resource type="Texture2D" uid="uid://brr0uq3m0rq86" path="res://resources/gui/panelbase.png" id="6_77ybp"]
+[ext_resource type="Texture2D" uid="uid://dke6330g2efwq" path="res://resources/gui/meter.png" id="7_rgq2e"]
 [ext_resource type="Script" path="res://src/beatmap/TypeSfx.gd" id="7_wpbul"]
+[ext_resource type="Texture2D" uid="uid://dhmps7dweb465" path="res://resources/gui/stick_up.png" id="8_481fq"]
 [ext_resource type="Script" path="res://src/beatmap/MissSfx.gd" id="8_d7f7r"]
+[ext_resource type="Texture2D" uid="uid://dti3e5rdjo4hi" path="res://resources/gui/stick_down.png" id="8_htpn2"]
 [ext_resource type="AudioStream" uid="uid://dvss7esuoxmm4" path="res://resources/sfx/typing/bell.wav" id="9_0dg83"]
 [ext_resource type="Script" path="res://src/beatmap/BellSfx.gd" id="10_frdvx"]
+[ext_resource type="FontFile" uid="uid://dqa5v8pjjmq3s" path="res://resources/fonts/Bagnard.otf" id="10_xus54"]
+[ext_resource type="Script" path="res://src/beatmap/ComboLabel.gd" id="11_uucwf"]
+[ext_resource type="Script" path="res://src/beatmap/AccuracyLabel.gd" id="12_rrdt2"]
+
+[sub_resource type="Shader" id="Shader_3huu6"]
+code = "shader_type canvas_item;
+
+uniform float line_width: hint_range(1, 100, 0.1) = 10.0;
+uniform vec4 starting_colour: source_color = vec4(0,0,0,1);
+uniform vec4 ending_colour: source_color = vec4(0.0);
+
+const float pi = 3.1415;
+const int ang_res = 16;
+const int grad_res = 8;
+
+float getLineWidth() {
+	return line_width;
+}
+
+bool pixelInRange(sampler2D text, vec2 uv, vec2 dist) {
+	float alpha = 0.0;
+	for (int i = 0; i < ang_res; i++) {
+		float angle = 2.0 * pi * float(i) / float(ang_res);
+		vec2 disp = dist * vec2(cos(angle), sin(angle));
+		if (texture(text, uv + disp).a > 0.0) return true;
+	}
+	return false;
+}
+
+float getClosestDistance(sampler2D text, vec2 uv, vec2 maxDist) {
+	if (!pixelInRange(text, uv, maxDist)) return -1.0;
+	
+	float hi = 1.0; float lo = 0.0;
+	
+	for (int i = 1; i <= grad_res; i++) {
+		float curr = (hi + lo) / 2.0;
+		if (pixelInRange(text, uv, curr * maxDist)) {
+			hi = curr;
+		}
+		else {
+			lo = curr;
+		}
+	}
+	return hi;
+	
+}
+
+void fragment() {
+	vec2 scaledDist = TEXTURE_PIXEL_SIZE * getLineWidth();
+	float w = getClosestDistance(TEXTURE, UV, scaledDist);
+	
+	if ((w > 0.0) && (texture(TEXTURE, UV).a < 0.2)) {
+		COLOR = mix(starting_colour, ending_colour, tanh(3.0*w));
+	}
+	else {
+		COLOR = texture(TEXTURE, UV);
+	}
+	
+}"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_x7s7s"]
+shader = SubResource("Shader_3huu6")
+shader_parameter/line_width = 24.0
+shader_parameter/starting_colour = Color(0.541176, 0.458824, 0.254902, 0.403922)
+shader_parameter/ending_colour = Color(0.141176, 0.141176, 0.141176, 0)
+
+[sub_resource type="GDScript" id="GDScript_yrlfw"]
+script/source = "extends Sprite2D
+
+@export var width_start: float = 25.0
+@export var width_end: float = 45.0
+@export var speed: float = 1.0
+
+var midpoint = (width_start + width_end) / 2.0
+var diff = (width_end - width_start) / 2.0
+
+
+func _process(delta):
+	var line_width = midpoint + (diff * sin((Time.get_ticks_msec() / 1000.0) * speed))
+	set_shader_line_width(line_width)
+
+func set_shader_line_width(width: float):
+	material.set_shader_parameter(\"line_width\", width)
+"
+
+[sub_resource type="GDScript" id="GDScript_ogsee"]
+script/source = "extends Control
+
+@onready var input_manager = %InputManager
+@onready var animation_player = $AnimationPlayer
+
+@export var anim_speed: float = 2.5
+
+
+func _ready():
+		# Attach to input mgr.
+	input_manager.letter_hit.connect(func (line: Line, letter: String, i: int, sd: int): on_key())
+	input_manager.letter_typo.connect(func (letter: String): on_key())
+
+
+func on_key():
+	animation_player.stop()
+	animation_player.play(\"Tap\", -1, anim_speed)
+	animation_player.seek(0.1)
+"
+
+[sub_resource type="Animation" id="Animation_bofpp"]
+resource_name = "Tap"
+step = 0.01
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("StickDown:visible")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.35, 1),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 1,
+"values": [false, true, true]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("StickUp:visible")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.35, 1),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 1,
+"values": [true, false, false]
+}
+tracks/2/type = "bezier"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("StickDown:scale:x")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"handle_modes": PackedInt32Array(0, 0),
+"points": PackedFloat32Array(1, -0.25, 0, 0.25, 0, 1, -0.25, 0, 0.25, 0),
+"times": PackedFloat32Array(0, 1)
+}
+tracks/3/type = "bezier"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("StickDown:scale:y")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"handle_modes": PackedInt32Array(0, 0, 0),
+"points": PackedFloat32Array(1, -0.25, 0, 0.25, 0, 0.448424, -0.25, 0, 0.14, 0.523854, 1, -0.51, -0.030437, 0.25, 0),
+"times": PackedFloat32Array(0, 0.35, 1)
+}
+tracks/4/type = "bezier"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("StickUp:scale:x")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"handle_modes": PackedInt32Array(0, 0),
+"points": PackedFloat32Array(1, -0.06, -0.0858355, 0.25, 0, 1, -0.25, 0, 0.25, 0),
+"times": PackedFloat32Array(0, 1)
+}
+tracks/5/type = "bezier"
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/path = NodePath("StickUp:scale:y")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/keys = {
+"handle_modes": PackedInt32Array(0, 0, 0, 0, 0),
+"points": PackedFloat32Array(0.874564, -0.25, 0, 0.04, 0.230713, 1.1, -0.05, -0.00271428, 0.05, 0, 1.1, -0.04, 0, 0.03, -0.30415, 0.301853, -0.05, 0.512997, 0.25, 0, 1, -0.25, 0, 0.25, 0),
+"times": PackedFloat32Array(0, 0.1, 0.26, 0.35, 1)
+}
+tracks/6/type = "bezier"
+tracks/6/imported = false
+tracks/6/enabled = true
+tracks/6/path = NodePath("StickUp:skew")
+tracks/6/interp = 1
+tracks/6/loop_wrap = true
+tracks/6/keys = {
+"handle_modes": PackedInt32Array(0, 0, 0),
+"points": PackedFloat32Array(-0.15, -0.25, 0, 0.07, 0.185855, -0.00757313, -0.13, 0.125426, 0.24, -0.238286, 0, -0.25, 0, 0.25, 0),
+"times": PackedFloat32Array(0, 0.35, 1)
+}
+tracks/7/type = "bezier"
+tracks/7/imported = false
+tracks/7/enabled = true
+tracks/7/path = NodePath("StickDown:skew")
+tracks/7/interp = 1
+tracks/7/loop_wrap = true
+tracks/7/keys = {
+"handle_modes": PackedInt32Array(0, 0, 0),
+"points": PackedFloat32Array(0, -0.25, 0, 0.25, 0, -0.0808583, -0.25, 0, 0.29, 0.122142, 0, -0.25, 0, 0.25, 0),
+"times": PackedFloat32Array(0, 0.35, 1)
+}
+
+[sub_resource type="Animation" id="Animation_lsbg5"]
+resource_name = "Zero"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("StickDown:visible")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [true]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("StickUp:visible")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [false]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_tiy5i"]
+_data = {
+"Tap": SubResource("Animation_bofpp"),
+"Zero": SubResource("Animation_lsbg5")
+}
+
+[sub_resource type="GDScript" id="GDScript_wl80q"]
+script/source = "extends RichTextLabel
+
+@onready var input_manager = %InputManager
+
+
+var chars_per_word: float = 4.0
+var duration_coverage: float = 2.0
+var render_wpm: float = 0.0
+var time_cache: Array = []
+
+
+func _ready():
+	input_manager.letter_pressed.connect(cache_key)
+
+
+func _process(delta):
+	var time = Time.get_ticks_msec()
+	var current_hits: float = 0.0
+	if time_cache.size() > 0:
+		for index in range(time_cache.size() - 1, -1, -1):
+			if (time - time_cache[index]) < (duration_coverage * 1000):
+				current_hits += 11.0
+			else:
+				break
+	var wpm: float = (current_hits / chars_per_word) / duration_coverage
+	render_wpm = lerp(render_wpm, wpm, 0.05)
+	set_text(\"[center]%s\\nWPM\" % round(render_wpm))
+
+
+func cache_key(letter: String):
+	var time = Time.get_ticks_msec()
+	time_cache.append(time)
+"
+
+[sub_resource type="GDScript" id="GDScript_gnqt1"]
+script/source = "extends Control
+
+@onready var beatmap_manager = $\"../../../..\"
+@onready var animation_player = $AnimationPlayer
+
+func _ready():
+	beatmap_manager.song_start.connect(play)
+
+
+func play(duration: float):
+	animation_player.play(\"Play\", -1, 1.0 / duration)
+"
+
+[sub_resource type="Animation" id="Animation_iellf"]
+resource_name = "Play"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Front:size")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(0, 4), Vector2(324, 4)]
+}
+
+[sub_resource type="Animation" id="Animation_khnff"]
+resource_name = "Zero"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Front:size")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(0, 4)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Front:scale")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.3),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(1, 1), Vector2(1, 1)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_kuayr"]
+_data = {
+"Play": SubResource("Animation_iellf"),
+"Zero": SubResource("Animation_khnff")
+}
 
 [sub_resource type="AudioStreamRandomizer" id="AudioStreamRandomizer_x23em"]
 random_pitch = 1.05
@@ -25,7 +358,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-split_offset = 480
+split_offset = 300
 script = ExtResource("2_kv084")
 
 [node name="ScreenTop" type="Control" parent="ScreenDivider"]
@@ -63,29 +396,13 @@ grow_vertical = 2
 alignment = 2
 script = ExtResource("4_jtqlj")
 
-[node name="BottomScreenDivider" type="VSplitContainer" parent="ScreenDivider"]
+[node name="KeycapManager" type="Control" parent="ScreenDivider"]
 layout_mode = 2
-split_offset = 20
-
-[node name="ScreenMiddle" type="Control" parent="ScreenDivider/BottomScreenDivider"]
-layout_mode = 2
-
-[node name="Background" type="ColorRect" parent="ScreenDivider/BottomScreenDivider/ScreenMiddle"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0, 0, 0, 1)
-
-[node name="KeycapManager" type="Control" parent="ScreenDivider/BottomScreenDivider"]
-clip_contents = true
-layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 8
 script = ExtResource("5_ow8bn")
 
-[node name="Background" type="ColorRect" parent="ScreenDivider/BottomScreenDivider/KeycapManager"]
-z_index = -1000
+[node name="Assets" type="Control" parent="ScreenDivider/KeycapManager"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -93,59 +410,168 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Hitline" type="ColorRect" parent="ScreenDivider/BottomScreenDivider/KeycapManager"]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.1
-anchor_right = 0.11
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0.980392, 0.478431, 0.478431, 1)
+[node name="Base" type="Sprite2D" parent="ScreenDivider/KeycapManager/Assets"]
+z_index = -1500
+material = SubResource("ShaderMaterial_x7s7s")
+texture = ExtResource("6_77ybp")
+offset = Vector2(0, -112)
+script = SubResource("GDScript_yrlfw")
+width_start = 27.0
+width_end = 33.0
 
-[node name="BarLines" type="Control" parent="ScreenDivider/BottomScreenDivider/KeycapManager"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="Gray" type="ColorRect" parent="ScreenDivider/BottomScreenDivider/KeycapManager/BarLines"]
+[node name="HitlineFrame" type="Control" parent="ScreenDivider/KeycapManager/Assets"]
 z_index = -999
-custom_minimum_size = Vector2(0, 10)
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-grow_horizontal = 2
-size_flags_vertical = 0
-color = Color(0, 0, 0, 0.576471)
+clip_contents = true
+layout_mode = 3
+anchors_preset = 0
+offset_left = -352.0
+offset_top = -136.0
+offset_right = 360.0
+offset_bottom = -68.0
 
-[node name="Gray2" type="ColorRect" parent="ScreenDivider/BottomScreenDivider/KeycapManager/BarLines"]
-z_index = -999
-custom_minimum_size = Vector2(0, 10)
-layout_mode = 1
-anchors_preset = 12
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 0
-size_flags_vertical = 0
-color = Color(0, 0, 0, 0.576471)
+[node name="Meter" type="Sprite2D" parent="ScreenDivider/KeycapManager/Assets/HitlineFrame"]
+z_index = -500
+position = Vector2(70, 38)
+texture = ExtResource("7_rgq2e")
 
-[node name="Gray3" type="ColorRect" parent="ScreenDivider/BottomScreenDivider/KeycapManager/BarLines"]
-z_index = -999
-custom_minimum_size = Vector2(0, 7)
+[node name="TapNode" type="Control" parent="ScreenDivider/KeycapManager/Assets"]
+z_index = 1500
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = SubResource("GDScript_ogsee")
+
+[node name="StickDown" type="Sprite2D" parent="ScreenDivider/KeycapManager/Assets/TapNode"]
+visible = false
+z_index = 2500
+position = Vector2(-282, -70)
+texture = ExtResource("8_htpn2")
+offset = Vector2(0, 14)
+
+[node name="StickUp" type="Sprite2D" parent="ScreenDivider/KeycapManager/Assets/TapNode"]
+z_index = 2500
+position = Vector2(-282, -70)
+scale = Vector2(1, 0.874564)
+skew = -0.15
+texture = ExtResource("8_481fq")
+offset = Vector2(0, -20)
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="ScreenDivider/KeycapManager/Assets/TapNode"]
+autoplay = "Zero"
+libraries = {
+"": SubResource("AnimationLibrary_tiy5i")
+}
+
+[node name="WPMLabel" type="RichTextLabel" parent="ScreenDivider/KeycapManager/Assets"]
 layout_mode = 1
-anchors_preset = 14
+anchors_preset = 8
+anchor_left = 0.5
 anchor_top = 0.5
-anchor_right = 1.0
+anchor_right = 0.5
 anchor_bottom = 0.5
+offset_left = -184.0
+offset_top = -48.0
+offset_right = -108.0
+offset_bottom = 8.0
 grow_horizontal = 2
 grow_vertical = 2
-size_flags_vertical = 0
-color = Color(0, 0, 0, 0.576471)
+theme_override_fonts/normal_font = ExtResource("10_xus54")
+theme_override_font_sizes/normal_font_size = 22
+bbcode_enabled = true
+text = "[center]0
+WPM"
+fit_content = true
+script = SubResource("GDScript_wl80q")
+
+[node name="ComboLabel" type="RichTextLabel" parent="ScreenDivider/KeycapManager/Assets"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -92.0
+offset_top = -47.0
+offset_right = 32.0
+offset_bottom = -19.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_fonts/normal_font = ExtResource("10_xus54")
+theme_override_font_sizes/normal_font_size = 22
+bbcode_enabled = true
+text = "[center]9999/9999"
+script = ExtResource("11_uucwf")
+
+[node name="AccuracyLabel" type="RichTextLabel" parent="ScreenDivider/KeycapManager/Assets"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -92.0
+offset_top = -32.0
+offset_right = 32.0
+offset_bottom = -4.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_fonts/normal_font = ExtResource("10_xus54")
+theme_override_font_sizes/normal_font_size = 22
+bbcode_enabled = true
+text = "[center]100.00%"
+scroll_active = false
+script = ExtResource("12_rrdt2")
+
+[node name="TextLabel" type="RichTextLabel" parent="ScreenDivider/KeycapManager/Assets"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 48.0
+offset_top = -46.0
+offset_right = 364.0
+offset_bottom = -2.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_fonts/normal_font = ExtResource("10_xus54")
+theme_override_font_sizes/normal_font_size = 30
+bbcode_enabled = true
+text = "[center]QWERTYPOP"
+fit_content = true
+
+[node name="TimeControl" type="Control" parent="ScreenDivider/KeycapManager/Assets"]
+anchors_preset = 0
+offset_left = 44.0
+offset_top = -4.0
+offset_right = 368.0
+script = SubResource("GDScript_gnqt1")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="ScreenDivider/KeycapManager/Assets/TimeControl"]
+autoplay = "Zero"
+libraries = {
+"": SubResource("AnimationLibrary_kuayr")
+}
+
+[node name="Back" type="ColorRect" parent="ScreenDivider/KeycapManager/Assets/TimeControl"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.541176, 0.458824, 0.254902, 1)
+
+[node name="Front" type="ColorRect" parent="ScreenDivider/KeycapManager/Assets/TimeControl"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -324.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.890196, 0.819608, 0.541176, 1)
 
 [node name="InputManager" type="Node" parent="."]
 unique_name_in_owner = true

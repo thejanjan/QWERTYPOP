@@ -1,54 +1,125 @@
-[gd_scene load_steps=6 format=3 uid="uid://cauaawp7dvga1"]
+[gd_scene load_steps=8 format=3 uid="uid://cauaawp7dvga1"]
 
 [ext_resource type="PackedScene" uid="uid://bon2n74n8h7e1" path="res://src/beatmap/BeatmapManager.tscn" id="1_jtjgy"]
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_7tvoe"]
-vertex_color_use_as_albedo = true
-albedo_color = Color(0.94902, 0.0941176, 0.0941176, 1)
-
-[sub_resource type="Animation" id="Animation_k5sva"]
-resource_name = "loop"
-loop_mode = 1
-tracks/0/type = "rotation_3d"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath(".")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 1, 1, 0, 0.707, -0.707, 0)
-
-[sub_resource type="AnimationLibrary" id="AnimationLibrary_oxa82"]
-_data = {
-"loop": SubResource("Animation_k5sva")
-}
+[ext_resource type="Script" path="res://src/beatmap/SUMBeatmapWorld.gd" id="1_xrv1x"]
+[ext_resource type="PackedScene" uid="uid://dlvpd78ylbrxw" path="res://src/beatmap/sum/box_group.tscn" id="2_pqnjc"]
 
 [sub_resource type="Environment" id="Environment_2wxge"]
 background_energy_multiplier = 0.0
 ambient_light_source = 3
 
+[sub_resource type="GDScript" id="GDScript_a7kvd"]
+script/source = "extends Node3D
+
+@onready var backboard = $\"../../Backboard\"
+
+
+func _ready():
+	backboard.new_col.connect(on_col)
+
+
+func _physics_process(delta):
+	var t = Time.get_ticks_msec()
+	var child_count = get_children().size()
+	for i in range(child_count):
+		var child = get_child(i)
+		child.transform = child.transform.translated(Vector3(0, 0.01 * sin((t / 300.0) + i), 0))
+
+
+func on_col(col: Color):
+	var cool_col = col.inverted()
+	for child in get_children():
+		child.set_visualizer_color(cool_col)
+"
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_7tvoe"]
+vertex_color_use_as_albedo = true
+albedo_color = Color(0.94902, 0.0941176, 0.0941176, 1)
+
+[sub_resource type="GDScript" id="GDScript_gxwnc"]
+script/source = "extends CSGBox3D
+
+signal new_col(col: Color)
+
+@onready var beatmap_manager = $\"../../BeatmapManager\"
+
+@export var timings: Array[int] = [0, 192]
+@export var colors: Array[Color] = [Color.BLACK, Color.WHITE]
+@export var holds: Array[int] = []
+
+func _process(delta):
+	# Figure out which two colors we should lerp between.
+	var sd: float = beatmap_manager.get_rational_subdivision()
+	
+	if (sd < timings.min()):
+		return set_albedo(colors[timings.find(timings.min())])
+	elif (sd >= timings.max()):
+		return set_albedo(colors[timings.find(timings.max())])
+	else:
+		var first_col: int = 0
+		var second_col: int = 0
+		for value in timings:
+			if sd > value:
+				first_col = value
+			else:
+				second_col = value
+				break
+		
+		var t: float = float(sd - first_col) / float(second_col - first_col)
+		if second_col in holds:
+			t = 0.0
+		var col1 = colors[timings.find(first_col)]
+		var col2 = colors[timings.find(second_col)]
+		set_albedo(col1.lerp(col2, t))
+
+func set_albedo(col: Color):
+	material.albedo_color = col
+	new_col.emit(col)
+"
+
 [node name="BeatmapMaster" type="Node"]
 
 [node name="BeatmapWorld" type="Node3D" parent="."]
+unique_name_in_owner = true
+script = ExtResource("1_xrv1x")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="BeatmapWorld"]
+environment = SubResource("Environment_2wxge")
+
+[node name="OmniLight3D" type="OmniLight3D" parent="BeatmapWorld"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.92186, 0, 0)
+light_energy = 4.106
+light_indirect_energy = 1.565
+omni_range = 23.945
+omni_attenuation = 1.8025
+
+[node name="MapSequencer" type="Node3D" parent="BeatmapWorld"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.51736, -10.3836)
+
+[node name="DanceParty" type="Node3D" parent="BeatmapWorld/MapSequencer"]
+script = SubResource("GDScript_a7kvd")
+
+[node name="BoxGroup1" parent="BeatmapWorld/MapSequencer/DanceParty" instance=ExtResource("2_pqnjc")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, 0)
+
+[node name="BoxGroup2" parent="BeatmapWorld/MapSequencer/DanceParty" instance=ExtResource("2_pqnjc")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.665313, 0)
+
+[node name="BoxGroup3" parent="BeatmapWorld/MapSequencer/DanceParty" instance=ExtResource("2_pqnjc")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0, 0)
+
+[node name="Backboard" type="CSGBox3D" parent="BeatmapWorld"]
+transform = Transform3D(12.617, 0, 0, 0, 5.02953, 0, 0, 0, 1, 0, 0, -12.5752)
+size = Vector3(2, 2, 2)
+material = SubResource("StandardMaterial3D_7tvoe")
+script = SubResource("GDScript_gxwnc")
+timings = Array[int]([0, 192, 336, 348, 360, 372, 384, 426, 432, 474, 480, 564, 576, 672, 756, 768, 815, 816, 864, 959, 960, 1128, 1140, 1152, 1200, 1248, 1343, 1344, 1392, 1440, 1536, 1632, 1728, 1824, 1920, 1968, 2064, 2112, 2208, 2304, 2400, 2496, 2592, 2688, 2784, 2880, 2976, 3072, 3264, 3456, 3840])
+colors = Array[Color]([Color(0, 0, 0, 1), Color(1, 1, 1, 1), Color(1, 1, 0, 1), Color(0.745098, 0, 0, 1), Color(0.827451, 0.360784, 0, 1), Color(0.776471, 0.192157, 0.384314, 1), Color(0.690196, 0.819608, 0.270588, 1), Color(0.937255, 0.835294, 0.407843, 1), Color(0.690196, 0.819608, 0.270588, 1), Color(0.937255, 0.835294, 0.407843, 1), Color(0.690196, 0.819608, 0.270588, 1), Color(0.341176, 0.619608, 0.545098, 1), Color(0.513726, 0.286275, 0.901961, 1), Color(0.619608, 0.0509804, 0.0509804, 1), Color(0.921569, 0.192157, 0.192157, 1), Color(0, 0, 0, 1), Color(0, 0, 0, 1), Color(0.85098, 0.447059, 0.160784, 1), Color(0.709804, 0.156863, 0.156863, 1), Color(0.929412, 0.25098, 0.6, 1), Color(0.443137, 0.14902, 0.831373, 1), Color(0.145098, 0.0509804, 1, 1), Color(0, 0, 0, 1), Color(1, 0.34902, 0, 1), Color(0.811765, 0.737255, 0.32549, 1), Color(0.74902, 0.101961, 0, 1), Color(0, 0, 0, 1), Color(1, 0.34902, 0, 1), Color(0.811765, 0.737255, 0.32549, 1), Color(0.74902, 0.101961, 0, 1), Color(0, 0, 0, 1), Color(1, 0.34902, 0, 1), Color(0, 0, 0, 1), Color(0.811765, 0.737255, 0.32549, 1), Color(0, 0, 0, 1), Color(0.243137, 0.619608, 0.870588, 1), Color(0.243137, 0.619608, 0.870588, 1), Color(0.345098, 0.345098, 0.345098, 1), Color(0.584314, 0.380392, 0.380392, 1), Color(0, 0, 0, 1), Color(0, 0.462745, 0, 1), Color(0, 0, 0, 1), Color(0, 0, 0.486275, 1), Color(0, 0, 0, 1), Color(0, 0.392157, 0.388235, 1), Color(0, 0, 0, 1), Color(0.588235, 0.282353, 0.105882, 1), Color(0, 0, 0, 1), Color(1, 0.34902, 0, 1), Color(1, 0.34902, 0.45098, 1), Color(0, 0, 0, 1)])
+holds = Array[int]([336, 348, 360, 1200, 1248, 1344, 1392, 1440, 1536, 1632, 1728, 1824, 1920, 1968, 3264])
 
 [node name="Camera3D" type="Camera3D" parent="BeatmapWorld"]
 projection = 1
 size = 10.0
-near = 0.056
-
-[node name="CSGBox3D" type="CSGBox3D" parent="BeatmapWorld"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -4.95653)
-material = SubResource("StandardMaterial3D_7tvoe")
-
-[node name="AnimationPlayer" type="AnimationPlayer" parent="BeatmapWorld/CSGBox3D"]
-autoplay = "loop"
-libraries = {
-"": SubResource("AnimationLibrary_oxa82")
-}
-
-[node name="OmniLight3D" type="OmniLight3D" parent="BeatmapWorld"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.48651)
-
-[node name="WorldEnvironment" type="WorldEnvironment" parent="BeatmapWorld"]
-environment = SubResource("Environment_2wxge")
+near = 0.001
 
 [node name="BeatmapManager" parent="." instance=ExtResource("1_jtjgy")]

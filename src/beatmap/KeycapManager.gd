@@ -3,9 +3,10 @@ extends Control
 # The KeycapManager handles the actual spawning
 # and cleanup of the visual scrolling keycaps.
 
-@onready var beatmap_manager = $"../../.."
+@onready var beatmap_manager = $"../.."
 @onready var input_manager = %InputManager
-@onready var hitline = $Hitline
+@onready var hitline = $Assets/HitlineFrame/Meter
+@onready var assets = $Assets
 
 @onready var scroll_note_tscn = preload("res://src/beatmap/scroll_note.tscn")
 
@@ -17,6 +18,16 @@ func _ready():
 	beatmap_manager.spawn_key.connect(spawn_key)
 	beatmap_manager.spawn_lion.connect(spawn_lion)
 	input_manager.letter_hit.connect(on_key_press)
+
+
+func _process(delta):
+	# Figure out how large we can make the meter.
+	var xmax_ratio = 1.0 / 780.0
+	var ymax_ratio = 1.0 / 480.0
+	var win_size: Vector2i = DisplayServer.window_get_size()
+	var best_scale = min(xmax_ratio * win_size[0], ymax_ratio * win_size[1])
+	#best_scale = round(best_scale * 4.0) / 4.0
+	assets.set_scale(Vector2(best_scale, best_scale))
 
 
 func spawn_key(line: Line, letter: String, sd: int) -> void:

@@ -8,6 +8,7 @@ var force_hit: bool = false
 signal letter_hit(line: Line, letter: String, i: int, sd: int)
 signal letter_miss(line: Line, letter: String)
 signal letter_typo(letter: String)
+signal letter_pressed(letter: String)
 signal final_letter_hit(line: Line, letter: String)
 
 @onready var beatmap_manager = $".."
@@ -37,6 +38,8 @@ func _input(event):
 		if input.length() != 1:
 			return
 		var inputs: Array[String] = [input, input.to_upper()]
+		
+		letter_pressed.emit(input)
 		
 		# Find a window that has this input.
 		var check_list = window_list.duplicate()

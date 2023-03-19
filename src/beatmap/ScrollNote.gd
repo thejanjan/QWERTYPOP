@@ -21,7 +21,8 @@ var rhythm_cols: Dictionary = {
 	# Whole Notes
 	(0.0 / 1.0): Color.WHITE,
 	(1.0 / 4.0): Color.DARK_ORANGE,
-	(2.0 / 4.0): Color.AQUA,
+	# (2.0 / 4.0): Color.AQUA,
+	(2.0 / 4.0): Color.BROWN,
 	(3.0 / 4.0): Color.DARK_ORANGE,
 	
 	# Triplets
@@ -77,6 +78,8 @@ func _process(delta):
 func add_letter(letter: String) -> void:
 	current_letters += letter
 	rich_text_label.set_text(px + get_render_letters() + sx)
+	
+	assets.set_size(Vector2(24 + (20 * current_letters.length()), 44))
 
 
 func remove_letter(letter: String) -> void:
@@ -102,21 +105,11 @@ func get_render_letters() -> String:
 func place_assets(t: float):
 	if not assets:
 		return
-	var winsize: Vector2i = DisplayServer.window_get_size()
-	var xoffset: float = (1 - t) * (winsize.x)
-	assets.set_position(Vector2(xoffset, 0))
+	# REMINDER: both keycap and lines run this code
+	var xoffset: float = (1 - t) * 900
+	var xalign: int = 10 * max(current_letters.length() - 1, 0)
+	assets.set_position(Vector2(xoffset - xalign, 0))
 	show()
-	
-	# also change note scaling
-	var x_ratio = 45.0 / 110.0
-	var y_ratio = 110.0 / 648.0
-	var new_yscale = y_ratio * winsize.y
-	var new_xscale = x_ratio * new_yscale
-	set_custom_minimum_size(Vector2(new_xscale, new_yscale))
-	
-	var text_ratio = 55.0 / 648.0
-	var text_size = text_ratio * winsize.y
-	rich_text_label.add_theme_font_size_override("normal_font_size", text_size)
 	
 	if t > 1.3:
 		queue_free()

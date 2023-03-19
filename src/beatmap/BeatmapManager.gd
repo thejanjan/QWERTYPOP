@@ -7,6 +7,7 @@ var audio_stream: AudioStream
 
 @onready var music = $Music
 @onready var line_manager = %LineManager
+@onready var camera_3d = %Camera3D
 
 # Beatmap state
 var current_sd: int = 0
@@ -19,6 +20,9 @@ signal end_line(line: Line)
 signal open_window(line: Line, key: String, i: int, sd: int)
 signal close_window(line: Line, key: String, i: int, sd: int)
 signal spawn_lion()
+
+signal song_start(duration: float)
+signal subdivision(sd: int)
 
 # Action to signal mapping
 var action2signal: Dictionary = {
@@ -46,6 +50,10 @@ func _ready():
 	music.set_stream(audio_stream)
 	music.set_pitch_scale(beatmap.get_speed_mult())
 	music.play()
+	
+	# Emit signals.
+	var duration: float = audio_stream.get_length() / beatmap.get_speed_mult()
+	song_start.emit(duration)
 
 func _process(delta):
 	# Call music_process if the track is playing.
@@ -71,6 +79,19 @@ func get_beatmap() -> Beatmap:
 func get_t() -> float:
 	return music.get_playback_position() / beatmap.get_speed_mult()
 
+### Useful Converters ###
+
+func get_rational_subdivision() -> float:
+	# Returns a floating point subdivision.
+	# Seconds -> SDs
+	# Seconds | Beats  | Minute  | SDs
+	#         x ------ x ------- x ----
+	#         | Minute | Seconds | Beat
+	var time = get_t()
+	var bpm = get_beatmap().get_bpm()
+	var sdsbeat = get_beatmap().get_map_SD()
+	return time * (bpm / 60.0) * float(sdsbeat)
+
 ### Music Logic ###
 
 func music_process(t: float):
@@ -94,6 +115,9 @@ func subdivision_process(sd: int, spawn: int):
 				sig.emit(args[0], args[1], args[2], args[3])
 			5:
 				sig.emit(args[0], args[1], args[2], args[3], args[4])
+	
+	# Emit the subdivision signal.
+	subdivision.emit(sd)
 
 func music_finish():
 	pass

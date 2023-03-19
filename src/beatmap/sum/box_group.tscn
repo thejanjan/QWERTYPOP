@@ -1,0 +1,117 @@
+[gd_scene load_steps=6 format=3 uid="uid://dlvpd78ylbrxw"]
+
+[sub_resource type="GDScript" id="GDScript_21yji"]
+script/source = "extends Node3D
+
+@onready var csg_polygon_3d: CSGPolygon3D = $CSGPolygon3D
+
+@export var minimum_db: int = 0
+@export var maximum_db: int = 10000
+@export var db_exp: float = 0.70
+
+@export var min_size: float = 1
+@export var max_size: float = 4
+@export var slices: int = 128
+
+@export var self_lerp: float = 0.66
+@export var adj_lerp: float = 0.85
+
+var db_segment = (float(maximum_db - minimum_db) / float(slices)) * 2.0
+var battery: Array[float] = []
+
+const MIN_DB = 60
+var spectrum
+
+
+func _ready():
+	spectrum = AudioServer.get_bus_effect_instance(0,0)
+
+func _process(delta):
+	var new_polys: PackedVector2Array = PackedVector2Array()
+	
+	# Go over each slice and calculate its energy.
+	for i in range(slices):
+		var min_db: int
+		var max_db: int
+		if i < (slices / 2):
+			min_db = minimum_db + (db_segment * i)
+			max_db = minimum_db + (db_segment * (i + 1))
+		else:
+			var ii = slices - i
+			min_db = minimum_db + (db_segment * ii)
+			max_db = minimum_db + (db_segment * (ii + 1))
+		var magnitude: float = spectrum.get_magnitude_for_frequency_range(int(min_db), int(max_db), 0).length()
+		var energy = clamp((MIN_DB + linear_to_db(magnitude)) / MIN_DB, 0, 1)
+		energy = pow(energy, db_exp)
+		
+		# Handle energy store.
+		if len(battery) < (i + 1):
+			battery.append(energy)
+		else:
+			energy = lerp(battery[i], energy, self_lerp)
+			var prev = (i - 1) if i != 0 else (slices - 1)
+			var next = (i + 1) if i != (slices - 1) else (0)
+			energy = lerp(battery[prev], energy, adj_lerp)
+			energy = lerp(battery[next], energy, adj_lerp)
+			battery[i] = energy
+		
+		# Translate this energy into a distance vector.
+		var dist = min_size + ((max_size - min_size) * energy)
+		var vec: Vector2 = Vector2.from_angle((1.5 * PI) + (2.0 * PI) * (float(i) / float(slices))) * dist
+		new_polys.append(vec)
+	
+	# Make this the new polygon size.
+	csg_polygon_3d.set_polygon(new_polys)
+
+func set_visualizer_color(col: Color):
+	csg_polygon_3d.material.albedo_color = col
+"
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_7tvoe"]
+vertex_color_use_as_albedo = true
+
+[sub_resource type="Animation" id="Animation_k5sva"]
+resource_name = "loop"
+loop_mode = 1
+tracks/0/type = "rotation_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 1, 1, 0, 0.707, -0.707, 0)
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_oxa82"]
+_data = {
+"loop": SubResource("Animation_k5sva")
+}
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2obto"]
+
+[node name="BoxGroup" type="Node3D"]
+script = SubResource("GDScript_21yji")
+
+[node name="OmniLight3D2" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.789073)
+visible = false
+light_energy = 4.67
+light_indirect_energy = 1.565
+light_negative = true
+omni_range = 1.7
+omni_attenuation = 0.965939
+
+[node name="CSGBox3D" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 5.42709)
+material = SubResource("StandardMaterial3D_7tvoe")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="CSGBox3D"]
+autoplay = "loop"
+libraries = {
+"": SubResource("AnimationLibrary_oxa82")
+}
+
+[node name="CSGPolygon3D" type="CSGPolygon3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.683094)
+polygon = PackedVector2Array(-1, -1, -1, 1, 1, 1, 1, -1)
+depth = 0.1
+material = SubResource("StandardMaterial3D_2obto")

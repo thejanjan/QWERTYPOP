@@ -1,0 +1,27 @@
+[gd_scene load_steps=2 format=3 uid="uid://buoxyj7edv7ps"]
+
+[sub_resource type="GDScript" id="GDScript_vi4uo"]
+script/source = "extends Node
+
+@onready var timer = $Timer
+
+var game = preload(\"res://src/beatmap/beatmap_master.tscn\")
+
+
+# Called when the node enters the scene tree for the first time.
+func _ready():
+	timer.timeout.connect(go_time)
+	timer.start()
+
+
+func go_time():
+	var g = game.instantiate()
+	add_child(g)
+	timer.stop()
+"
+
+[node name="RecordingScene" type="Node"]
+script = SubResource("GDScript_vi4uo")
+
+[node name="Timer" type="Timer" parent="."]
+wait_time = 10.0
